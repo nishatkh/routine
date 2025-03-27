@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduSchedule - Class Routine Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #f8f9fc;
+            --text-color: #5a5c69;
+            --card-bg: #ffffff;
+            --body-bg: #f8f9fc;
+            --navbar-bg: #ffffff;
+            --sidebar-bg: #ffffff;
+            --border-color: #e3e6f0;
+            --success-color: #1cc88a;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --info-color: #36b9cc;
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #4e73df;
+            --secondary-color: #2a2f45;
+            --text-color: #d1d3e2;
+            --card-bg: #2a2f45;
+            --body-bg: #1a1d2e;
+            --navbar-bg: #2a2f45;
+            --sidebar-bg: #2a2f45;
+            --border-color: #3a3f58;
+            --success-color: #1cc88a;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --info-color: #36b9cc;
+        }
+
+        body {
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-color);
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background-color: var(--navbar-bg) !important;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            transition: background-color var(--transition-speed);
+        }
+
+        .sidebar {
+            background-color: var(--sidebar-bg);
+            min-height: calc(100vh - 56px);
+            transition: all var(--transition-speed);
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .sidebar .nav-link {
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            transition: all var(--transition-speed);
+        }
+
+        .sidebar .nav-link:hover {
+            color: var(--primary-color);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .nav-link.active {
+            color: var(--primary-color);
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 0.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            transition: all var(--transition-speed);
+        }
+
+        .card-header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table {
+            color: var(--text-color);
+        }
+
+        .form-control, .form-select {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #2e59d9;
+            border-color: #2653d4;
+        }
+
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        .border-left-primary {
+            border-left: 0.25rem solid var(--primary-color) !important;
+        }
+
+        .fade-in {
+            animation: fadeIn var(--transition-speed);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .routine-cell {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .routine-cell:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .time-slot {
+            background-color: rgba(78, 115, 223, 0.1);
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .conflict {
+            background-color: rgba(231, 74, 59, 0.1);
+            border-left: 3px solid var(--danger-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(30deg);
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            background-color: var(--card-bg);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s forwards;
+        }
+
+        .page-transition {
+            animation: fadeIn 0.3s;
+        }
+
+        .tooltip-inner {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .bs-tooltip-auto[data-popper-placement^=top] .tooltip-arrow::before, 
+        .bs-tooltip-top .tooltip-arrow::before {
+            border-top-color: var(--border-color);
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .modal-header, .modal-footer {
+            border-color: var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                z-index: 1000;
+                width: 250px;
+                height: 100vh;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- React and other libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.21.4/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Main App Component
+        function App() {
+            const [darkMode, setDarkMode] = useState(false);
+            const [authenticated, setAuthenticated] = useState(false);
+            const [currentUser, setCurrentUser] = useState(null);
+            const [currentView, setCurrentView] = useState('login');
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+            const [schedules, setSchedules] = useState([]);
+            const [classes, setClasses] = useState(['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5']);
+            const [subjects, setSubjects] = useState(['Math', 'Science', 'History', 'English', 'Art']);
+            const [teachers, setTeachers] = useState(['Mr. Smith', 'Ms. Johnson', 'Dr. Brown', 'Prof. Davis', 'Mrs. Wilson']);
+            const [rooms, setRooms] = useState(['Room 101', 'Room 102', 'Room 103', 'Room 104', 'Room 105']);
+            const [users, setUsers] = useState([
+                { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Admin User' },
+                { id: 2, username: 'teacher1', password: 'teacher123', role: 'teacher', name: 'Ms. Johnson' },
+                { id: 3, username: 'student1', password: 'student123', role: 'student', name: 'John Doe' }
+            ]);
+            const [editingSchedule, setEditingSchedule] = useState(null);
+            const [showScheduleModal, setShowScheduleModal] = useState(false);
+            const [conflicts, setConflicts] = useState([]);
+
+            // Days and time slots
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+            const timeSlots = [
+                '08:00 - 09:00', '09:00 - 10:00', '10:00 - 11:00', 
+                '11:00 - 12:00', '12:00 - 13:00', '13:00 - 14:00', 
+                '14:00 - 15:00', '15:00 - 16:00'
+            ];
+
+            // Save data to local storage whenever it changes
+            useEffect(() => {
+                if (authenticated) {
+                    const data = {
+                        schedules,
+                        classes,
+                        subjects,
+                        teachers,
+                        rooms,
+                        users,
+                        darkMode
+                    };
+                    localStorage.setItem('eduschedule_data', JSON.stringify(data));
+                }
+            }, [schedules, classes, subjects, teachers, rooms, users, authenticated, darkMode]);
+
+            // Load data from local storage on initial load
+            useEffect(() => {
+                const savedData = localStorage.getItem('eduschedule_data');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    setSchedules(data.schedules || []);
+                    setClasses(data.classes || ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5']);
+                    setSubjects(data.subjects || ['Math', 'Science', 'History', 'English', 'Art']);
+                    setTeachers(data.teachers || ['Mr. Smith', 'Ms. Johnson', 'Dr. Brown', 'Prof. Davis', 'Mrs. Wilson']);
+                    setRooms(data.rooms || ['Room 101', 'Room 102', 'Room 103', 'Room 104', 'Room 105']);
+                    setUsers(data.users || [
+                        { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Admin User' },
+                        { id: 2, username: 'teacher1', password: 'teacher123', role: 'teacher', name: 'Ms. Johnson' },
+                        { id: 3, username: 'student1', password: 'student123', role: 'student', name: 'John Doe' }
+                    ]);
+                    setDarkMode(data.darkMode || false);
+                }
+
+                // Check for auth token (simulated)
+                const token = localStorage.getItem('authToken');
+                if (token) {
+                    setAuthenticated(true);
+                    const userData = JSON.parse(localStorage.getItem('currentUser'));
+                    if (userData) {
+                        setCurrentUser(userData);
+                        setCurrentView(userData.role === 'admin' ? 'admin' : 'dashboard');
+                    } else {
+                        // Default to admin if no user data found
+                        const adminUser = users.find(u => u.role === 'admin') || users[0];
+                        setCurrentUser(adminUser);
+                        setCurrentView('admin');
+                    }
+                }
+            }, []);
+
+            // Toggle dark mode
+            const toggleDarkMode = () => {
+                setDarkMode(!darkMode);
+                document.body.setAttribute('data-theme', !darkMode ? 'dark' : 'light');
+            };
+
+            // Login function
+            const handleLogin = (username, password) => {
+                const user = users.find(u => u.username === username && u.password === password);
+                if (user) {
+                    setAuthenticated(true);
+                    setCurrentUser(user);
+                    setCurrentView(user.role === 'admin' ? 'admin' : 'dashboard');
+                    localStorage.setItem('authToken', 'dummy-token');
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    return true;
+                }
+                return false;
+            };
+
+            // Logout function
+            const handleLogout = () => {
+                setAuthenticated(false);
+                setCurrentUser(null);
+                setCurrentView('login');
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('currentUser');
+            };
+
+            // Register function
+            const handleRegister = (username, password, name) => {
+                const newUser = {
+                    id: users.length + 1,
+                    username,
+                    password,
+                    name,
+                    role: 'student'
+                };
+                setUsers([...users, newUser]);
+                return true;
+            };
+
+            // Add new schedule
+            const addSchedule = (schedule) => {
+                const newSchedule = { ...schedule, id: schedules.length + 1 };
+                setSchedules([...schedules, newSchedule]);
+                checkConflicts();
+            };
+
+            // Update schedule
+            const updateSchedule = (updatedSchedule) => {
+                setSchedules(schedules.map(s => 
+                    s.id === updatedSchedule.id ? updatedSchedule : s
+                ));
+                checkConflicts();
+            };
+
+            // Delete schedule
+            const deleteSchedule = (id) => {
+                setSchedules(schedules.filter(s => s.id !== id));
+                checkConflicts();
+            };
+
+            // Check for scheduling conflicts
+            const checkConflicts = () => {
+                const newConflicts = [];
+                
+                schedules.forEach((schedule, i) => {
+                    schedules.forEach((otherSchedule, j) => {
+                        if (i !== j && 
+                            schedule.day === otherSchedule.day && 
+                            schedule.timeSlot === otherSchedule.timeSlot) {
+                            
+                            // Check for room conflict
+                            if (schedule.room === otherSchedule.room) {
+                                newConflicts.push({
+                                    type: 'room',
+                                    schedule1: schedule,
+                                    schedule2: otherSchedule
+                                });
+                            }
+                            
+                            // Check for teacher conflict
+                            if (schedule.teacher === otherSchedule.teacher) {
+                                newConflicts.push({
+                                    type: 'teacher',
+                                    schedule1: schedule,
+                                    schedule2: otherSchedule
+                                });
+                            }
+                            
+                            // Check for class conflict
+                            if (schedule.class === otherSchedule.class) {
+                                newConflicts.push({
+                                    type: 'class',
+                                    schedule1: schedule,
+                                    schedule2: otherSchedule
+                                });
+                            }
+                        }
+                    });
+                });
+                
+                setConflicts(newConflicts);
+            };
+
+            // Set theme on initial load
+            useEffect(() => {
+                document.body.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+            }, [darkMode]);
+
+            // Check conflicts when schedules change
+            useEffect(() => {
+                checkConflicts();
+            }, [schedules]);
+
+            return (
+                <div className={`d-flex flex-column min-vh-100 ${darkMode ? 'dark' : 'light'}`}>
+                    {authenticated ? (
+                        <>
+                            {/* Navbar */}
+                            <nav className="navbar navbar-expand navbar-light shadow">
+                                <div className="container-fluid">
+                                    <button 
+                                        className="navbar-toggler me-2" 
+                                        type="button" 
+                                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                                    >
+                                        <span className="navbar-toggler-icon"></span>
+                                    </button>
+                                    <a className="navbar-brand fw-bold text-primary" href="#">
+                                        <i className="bi bi-calendar-week me-2"></i>EduSchedule
+                                    </a>
+                                    
+                                    <div className="d-flex align-items-center ms-auto">
+                                        <div className="me-3">
+                                            <span className="fw-bold">{currentUser?.name}</span>
+                                            <span className="badge bg-primary ms-2">{currentUser?.role}</span>
+                                        </div>
+                                        <button 
+                                            className="btn btn-link theme-toggle me-2" 
+                                            onClick={toggleDarkMode}
+                                            title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                                        >
+                                            <i className={`bi ${darkMode ? 'bi-sun' : 'bi-moon'}`}></i>
+                                        </button>
+                                        <button className="btn btn-outline-danger" onClick={handleLogout}>
+                                            <i className="bi bi-box-arrow-right"></i> Logout
+                                        </button>
+                                    </div>
+                                </div>
+                            </nav>
+
+                            {/* Main Content */}
+                            <div className="d-flex flex-grow-1">
+                                {/* Sidebar */}
+                                <div className={`sidebar ${sidebarOpen ? 'show' : ''}`}>
+                                    <div className="sidebar-sticky pt-3">
+                                        <ul className="nav flex-column">
+                                            <li className="nav-item">
+                                                <button 
+                                                    className={`nav-link ${currentView === 'dashboard' ? 'active' : ''}`}
+                                                    onClick={() => {
+                                                        setCurrentView('dashboard');
+                                                        setSidebarOpen(false);
+                                                    }}
+                                                >
+                                                    <i className="bi bi-speedometer2"></i> Dashboard
+                                                </button>
+                                            </li>
+                                            {currentUser?.role === 'admin' && (
+                                                <>
+                                                    <li className="nav-item">
+                                                        <button 
+                                                            className={`nav-link ${currentView === 'admin' ? 'active' : ''}`}
+                                                            onClick={() => {
+                                                                setCurrentView('admin');
+                                                                setSidebarOpen(false);
+                                                            }}
+                                                        >
+                                                            <i className="bi bi-gear"></i> Admin Panel
+                                                        </button>
+                                                    </li>
+                                                    <li className="nav-item">
+                                                        <button 
+                                                            className={`nav-link ${currentView === 'manageClasses' ? 'active' : ''}`}
+                                                            onClick={() => {
+                                                                setCurrentView('manageClasses');
+                                                                setSidebarOpen(false);
+                                                            }}
+                                                        >
+                                                            <i className="bi bi-journal-bookmark"></i> Manage Classes
+                                                        </button>
+                                                    </li>
+                                                    <li className="nav-item">
+                                                        <button 
+                                                            className={`nav-link ${currentView === 'manageUsers' ? 'active' : ''}`}
+                                                            onClick={() => {
+                                                                setCurrentView('manageUsers');
+                                                                setSidebarOpen(false);
+                                                            }}
+                                                        >
+                                                            <i className="bi bi-people"></i> Manage Users
+                                                        </button>
+                                                    </li>
+                                                </>
+                                            )}
+                                            <li className="nav-item">
+                                                <button 
+                                                    className={`nav-link ${currentView === 'profile' ? 'active' : ''}`}
+                                                    onClick={() => {
+                                                        setCurrentView('profile');
+                                                        setSidebarOpen(false);
+                                                    }}
+                                                >
+                                                    <i className="bi bi-person"></i> Profile
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                {/* Page Content */}
+                                <main className={`main-content flex-grow-1 p-4 page-transition ${sidebarOpen ? 'sidebar-open' : ''}`}>
+                                    {currentView === 'dashboard' && (
+                                        <DashboardView 
+                                            schedules={schedules} 
+                                            days={days} 
+                                            timeSlots={timeSlots} 
+                                            conflicts={conflicts}
+                                            currentUser={currentUser}
+                                        />
+                                    )}
+                                    {currentView === 'admin' && (
+                                        <AdminView 
+                                            schedules={schedules} 
+                                            days={days} 
+                                            timeSlots={timeSlots} 
+                                            classes={classes} 
+                                            subjects={subjects} 
+                                            teachers={teachers} 
+                                            rooms={rooms}
+                                            conflicts={conflicts}
+                                            addSchedule={addSchedule}
+                                            updateSchedule={updateSchedule}
+                                            deleteSchedule={deleteSchedule}
+                                            setEditingSchedule={setEditingSchedule}
+                                            setShowScheduleModal={setShowScheduleModal}
+                                        />
+                                    )}
+                                    {currentView === 'manageClasses' && (
+                                        <ManageClassesView 
+                                            classes={classes} 
+                                            setClasses={setClasses}
+                                            schedules={schedules}
+                                            setSchedules={setSchedules}
+                                        />
+                                    )}
+                                    {currentView === 'manageUsers' && (
+                                        <ManageUsersView 
+                                            users={users} 
+                                            setUsers={setUsers} 
+                                            currentUser={currentUser}
+                                        />
+                                    )}
+                                    {currentView === 'profile' && (
+                                        <ProfileView 
+                                            currentUser={currentUser} 
+                                            setCurrentUser={setCurrentUser}
+                                        />
+                                    )}
+                                </main>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="d-flex flex-column justify-content-center align-items-center min-vh-100">
+                            {currentView === 'login' && (
+                                <LoginView 
+                                    onLogin={handleLogin} 
+                                    switchToRegister={() => setCurrentView('register')}
+                                />
+                            )}
+                            {currentView === 'register' && (
+                                <RegisterView 
+                                    onRegister={handleRegister} 
+                                    switchToLogin={() => setCurrentView('login')}
+                                />
+                            )}
+                        </div>
+                    )}
+
+                    {/* Schedule Modal */}
+                    {showScheduleModal && (
+                        <ScheduleModal 
+                            schedule={editingSchedule} 
+                            days={days} 
+                            timeSlots={timeSlots} 
+                            classes={classes} 
+                            subjects={subjects} 
+                            teachers={teachers} 
+                            rooms={rooms}
+                            onSave={editingSchedule ? updateSchedule : addSchedule}
+                            onClose={() => {
+                                setShowScheduleModal(false);
+                                setEditingSchedule(null);
+                            }}
+                            conflicts={conflicts}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        // Dashboard View Component
+        function DashboardView({ schedules, days, timeSlots, conflicts, currentUser }) {
+            const [filter, setFilter] = useState({
+                day: '',
+                class: '',
+                teacher: ''
+            });
+
+            // Filter schedules based on user role
+            const filteredSchedules = schedules.filter(schedule => {
+                if (currentUser.role === 'teacher' && schedule.teacher !== currentUser.name) {
+                    return false;
+                }
+                if (currentUser.role === 'student' && schedule.class !== currentUser.class) {
+                    return false;
+                }
+                if (filter.day && schedule.day !== filter.day) return false;
+                if (filter.class && schedule.class !== filter.class) return false;
+                if (filter.teacher && schedule.teacher !== filter.teacher) return false;
+                return true;
+            });
+
+            // Get unique values for filters
+            const uniqueClasses = [...new Set(schedules.map(s => s.class))];
+            const uniqueTeachers = [...new Set(schedules.map(s => s.teacher))];
+
+            return (
+                <div className="fade-in">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h2 className="mb-0"><i className="bi bi-speedometer2 me-2"></i> Dashboard</h2>
+                        <div className="d-flex">
+                            <select 
+                                className="form-select me-2" 
+                                value={filter.day} 
+                                onChange={(e) => setFilter({...filter, day: e.target.value})}
+                            >
+                                <option value="">All Days</option>
+                                {days.map(day => (
+                                    <option key={day} value={day}>{day}</option>
+                                ))}
+                            </select>
+                            {currentUser.role !== 'teacher' && (
+                                <select 
+                                    className="form-select me-2" 
+                                    value={filter.class} 
+                                    onChange={(e) => setFilter({...filter, class: e.target.value})}
+                                >
+                                    <option value="">All Classes</option>
+                                    {uniqueClasses.map(cls => (
+                                        <option key={cls} value={cls}>{cls}</option>
+                                    ))}
+                                </select>
+                            )}
+                            {currentUser.role !== 'student' && (
+                                <select 
+                                    className="form-select" 
+                                    value={filter.teacher} 
+                                    onChange={(e) => setFilter({...filter, teacher: e.target.value})}
+                                >
+                                    <option value="">All Teachers</option>
+                                    {uniqueTeachers.map(teacher => (
+                                        <option key={teacher} value={teacher}>{teacher}</option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
+                    </div>
+
+                    {conflicts.length > 0 && (
+                        <div className="alert alert-warning mb-4">
+                            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                            There are {conflicts.length} scheduling conflicts that need attention.
+                        </div>
+                    )}
+
+                    <div className="card shadow mb-4">
+                        <div className="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 className="m-0 font-weight-bold text-primary">Class Schedule</h6>
+                        </div>
+                        <div className="card-body">
+                            <div className="table-responsive">
+                                <table className="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Day</th>
+                                            <th>Time</th>
+                                            <th>Class</th>
+                                            <th>Subject</th>
+                                            <th>Teacher</th>
+                                            <th>Room</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredSchedules.length > 0 ? (
+                                            filteredSchedules.map(schedule => (
+                                                <tr key={schedule.id}>
+                                                    <td>{schedule.day}</td>
+                                                    <td>{schedule.timeSlot}</td>
+                                                    <td>{schedule.class}</td>
+                                                    <td>{schedule.subject}</td>
+                                                    <td>{schedule.teacher}</td>
+                                                    <td>{schedule.room}</td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="6" className="text-center">No schedules found</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card shadow">
+                        <div className="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 className="m-0 font-weight-bold text-primary">Weekly View</h6>
+                        </div>
+                        <div className="card-body">
+                            <div className="table-responsive">
+                                <table className="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            {days.map(day => (
+                                                <th key={day}>{day}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {timeSlots.map(time => (
+                                            <tr key={time}>
+                                                <td className="time-slot">{time}</td>
+                                                {days.map(day => {
+                                                    const schedule = filteredSchedules.find(s => 
+                                                        s.day === day && s.timeSlot === time
+                                                    );
+                                                    const isConflict = conflicts.some(c => 
+                                                        (c.schedule1.day === day && c.schedule1.timeSlot === time) || 
+                                                        (c.schedule2.day === day && c.schedule2.timeSlot === time)
+                                                    );
+                                                    
+                                                    return (
+                                                        <td 
+                                                            key={`${day}-${time}`} 
+                                                            className={`routine-cell ${isConflict ? 'conflict' : ''}`}
+                                                        >
+                                                            {schedule ? (
+                                                                <div>
+                                                                    <strong>{schedule.class}</strong>
+                                                                    <div>{schedule.subject}</div>
+                                                                    <small className="text-muted">{schedule.teacher}</small>
+                                                                    <div><small>{schedule.room}</small></div>
+                                                                </div>
+                                                            ) : '-'}
+                                                        </td>
+                                                    );
+                                                })}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Admin View Component
+        function AdminView({ 
+            schedules, 
+            days, 
+            timeSlots, 
+            classes, 
+            subjects, 
+            teachers, 
+            rooms, 
+            conflicts,
+            addSchedule, 
+            updateSchedule, 
+            deleteSchedule,
+            setEditingSchedule,
+            setShowScheduleModal
+        }) {
+            const [filter, setFilter] = useState({
+                day: '',
+                class: ''
+            });
+
+            const filteredSchedules = schedules.filter(schedule => {
+                if (filter.day && schedule.day !== filter.day) return false;
+                if (filter.class && schedule.class !== filter.class) return false;
+                return true;
+            });
+
+            const handleEdit = (schedule) => {
+                setEditingSchedule(schedule);
+                setShowScheduleModal(true);
+            };
+
+            const handleAddNew = () => {
+                setEditingSchedule(null);
+                setShowScheduleModal(true);
+            };
+
+            return (
+                <div className="fade-in">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h2 className="mb-0"><i className="bi bi-gear me-2"></i> Admin Panel</h2>
+                        <div className="d-flex">
+                            <select 
+                                className="form-select me-2" 
+                                value={filter.day} 
+                                onChange={(e) => setFilter({...filter, day: e.target.value})}
+                            >
+                                <option value="">All Days</option>
+                                {days.map(day => (
+                                    <option key={day} value={day}>{day}</option>
+                                ))}
+                            </select>
+                            <select 
+                                className="form-select" 
+                                value={filter.class} 
+                                onChange={(e) => setFilter({...filter, class: e.target.value})}
+                            >
+                                <option value="">All Classes</option>
+                                {classes.map(cls => (
+                                    <option key={cls} value={cls}>{cls}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {conflicts.length > 0 && (
+                        <div className="alert alert-warning mb-4">
+                            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                            There are {conflicts.length} scheduling conflicts:
+                            <ul className="mt-2">
+                                {conflicts.map((conflict, index) => (
+                                    <li key={index}>
+                                        {conflict.type} conflict on {conflict.schedule1.day} at {conflict.schedule1.timeSlot}: 
+                                        {conflict.schedule1.class} ({conflict.schedule1.teacher}, {conflict.schedule1.room}) vs 
+                                        {conflict.schedule2.class} ({conflict.schedule2.teacher}, {conflict.schedule2.room})
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    <div className="card shadow mb-4">
+                        <div className="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 className="m-0 font-weight-bold text-primary">Manage Schedules</h6>
+                            <button className="btn btn-primary btn-sm" onClick={handleAddNew}>
+                                <i className="bi bi-plus-lg"></i> Add New
+                            </button>
+                        </div>
+                        <div className="card-body">
+                            <div className="table-responsive">
+                                <table className="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Day</th>
+                                            <th>Time</th>
+                                            <th>Class</th>
+                                            <th>Subject</th>
+                                            <th>Teacher</th>
+                                            <th>Room</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredSchedules.length > 0 ? (
+                                            filteredSchedules.map(schedule => {
+                                                const isConflict = conflicts.some(c => 
+                                                    c.schedule1.id === schedule.id || c.schedule2.id === schedule.id
+                                                );
+                                                
+                                                return (
+                                                    <tr key={schedule.id} className={isConflict ? 'table-warning' : ''}>
+                                                        <td>{schedule.day}</td>
+                                                        <td>{schedule.timeSlot}</td>
+                                                        <td>{schedule.class}</td>
+                                                        <td>{schedule.subject}</td>
+                                                        <td>{schedule.teacher}</td>
+                                                        <td>{schedule.room}</td>
+                                                        <td>
+                                                            <button 
+                                                                className="btn btn-sm btn-outline-primary me-2"
+                                                                onClick={() => handleEdit(schedule)}
+                                                            >
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
+                                                            <button 
+                                                                className="btn btn-sm btn-outline-danger"
+                                                                onClick={() => {
+                                                                    if (window.confirm('Are you sure you want to delete this schedule?')) {
+                                                                        deleteSchedule(schedule.id);
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <i className="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="7" className="text-center">No schedules found</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card shadow">
+                        <div className="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 className="m-0 font-weight-bold text-primary">Schedule Overview</h6>
+                        </div>
+                        <div className="card-body">
+                            <div className="table-responsive">
+                                <table className="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            {days.map(day => (
+                                                <th key={day}>{day}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {timeSlots.map(time => (
+                                            <tr key={time}>
+                                                <td className="time-slot">{time}</td>
+                                                {days.map(day => {
+                                                    const schedule = schedules.find(s => 
+                                                        s.day === day && s.timeSlot === time
+                                                    );
+                                                    const isConflict = conflicts.some(c => 
+                                                        (c.schedule1.day === day && c.schedule1.timeSlot === time) || 
+                                                        (c.schedule2.day === day && c.schedule2.timeSlot === time)
+                                                    );
+                                                    
+                                                    return (
+                                                        <td 
+                                                            key={`${day}-${time}`} 
+                                                            className={`routine-cell ${isConflict ? 'conflict' : ''}`}
+                                                        >
+                                                            {schedule ? (
+                                                                <div>
+                                                                    <strong>{schedule.class}</strong>
+                                                                    <div>{schedule.subject}</div>
+                                                                    <small className="text-muted">{schedule.teacher}</small>
+                                                                    <div><small>{schedule.room}</small></div>
+                                                                </div>
+                                                            ) : '-'}
+                                                        </td>
+                                                    );
+                                                })}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Manage Classes View Component
+        function ManageClassesView({ classes, setClasses, schedules, setSchedules }) {
+            const [newClassName, setNewClassName] = useState('');
+            const [editingClass, setEditingClass] = useState(null);
+            const [editClassName, setEditClassName] = useState('');
+
+            const handleAddClass = () => {
+                if (newClassName.trim()) {
+                    setClasses([...classes, newClassName.trim()]);
+                    setNewClassName('');
+                }
+            };
+
+            const handleUpdateClass = () => {
+                if (editClassName.trim() && editingClass !== null) {
+                    const updatedClasses = [...classes];
+                    const oldClassName = updatedClasses[editingClass];
+                    updatedClasses[editingClass] = editClassName.trim();
+                    setClasses(updatedClasses);
+                    
+                    // Update any schedules that reference this class
+                    setSchedules(schedules.map(schedule => 
+                        schedule.class === oldClassName 
+                            ? { ...schedule, class: editClassName.trim() } 
+                            : schedule
+                    ));
+                    
+                    setEditingClass(null);
+                }
+            };
+
+            const handleDeleteClass = (index) => {
+                const classNameToDelete = classes[index];
+                const hasSchedules = schedules.some(s => s.class === classNameToDelete);
+                
+                if (hasSchedules) {
+                    if (!window.confirm(`This class has scheduled sessions. Deleting it will also remove ${schedules.filter(s => s.class === classNameToDelete).length} schedules. Continue?`)) {
+                        return;
+                    }
+                }
+                
+                if (window.confirm(`Delete ${classNameToDelete}?`)) {
+                    setClasses(classes.filter((_, i) => i !== index));
+                    setSchedules(schedules.filter(s => s.class !== classNameToDelete));
+                }
+            };
+
+            return (
+                <div className="fade-in">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h2 className="mb-0"><i className="bi bi-journal-bookmark me-2"></i> Manage Classes</h2>
+                    </div>
+
+                    <div className="card shadow mb-4">
+                        <div className="card-header py-3">
+                            <h6 className="m-0 font-weight-bold text-primary">Add New Class</h6>
+                        </div>
+                        <div className="card-body">
+                            <div className="input-group mb-3">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Class name"
+                                    value={newClassName}
+                                    onChange={(e) => setNewClassName(e.target.value)}
+                                />
+                                <button className="btn btn-primary" onClick={handleAddClass}>
+                                    <i className="bi bi-plus-lg"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card shadow">
+                        <div className="card-header py-3">
+                            <h6 className="m-0 font-weight-bold text-primary">Existing Classes</h6>
+                        </div>
+                        <div className="card-body">
+                            <div className="table-responsive">
+                                <table className="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Class Name</th>
+                                            <th>Scheduled Sessions</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {classes.map((cls, index) => {
+                                            const classSchedules = schedules.filter(s => s.class === cls).length;
+                                            return (
+                                                <tr key={index}>
+                                                    <td>
+                                                        {editingClass === index ? (
+                                                            <input
+                                                                type="text"
+                                                                className="form-control"
+                                                                value={editClassName}
+                                                                onChange={(e) => setEditClassName(e.target.value)}
+                                                            />
+                                                        ) : (
+                                                            cls
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        {classSchedules} session(s)
+                                                    </td>
+                                                    <td>
+                                                        {editingClass === index ? (
+                                                            <>
+                                                                <button 
+                                                                    className="btn btn-sm btn-success me-2"
+                                                                    onClick={handleUpdateClass}
+                                                                >
+                                                                    <i className="bi bi-check"></i> Save
+                                                                </button>
+                                                                <button 
+                                                                    className="btn btn-sm btn-secondary"
+                                                                    onClick={() => setEditingClass(null)}
+                                                                >
+                                                                    <i className="bi bi-x"></i> Cancel
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <button 
+                                                                    className="btn btn-sm btn-primary me-2"
+                                                                    onClick={() => {
+                                                                        setEditingClass(index);
+                                                                        setEditClassName(cls);
+                                                                    }}
+                                                                >
+                                                                    <i className="bi bi-pencil"></i> Edit
+                                                                </button>
+                                                                <button 
+                                                                    className="btn btn-sm btn-danger"
+                                                                    onClick={() => handleDeleteClass(index)}
+                                                                    disabled={cls === 'Class 1' || cls === 'Class 2' || cls === 'Class 3' || cls === 'Class 4' || cls === 'Class 5'}
+                                                                >
+                                                                    <i className="bi bi-trash"></i> Delete
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Schedule Modal Component
+        function ScheduleModal({ 
+            schedule, 
+            days, 
+            timeSlots, 
+            classes, 
+            subjects, 
+            teachers, 
+            rooms, 
+            onSave, 
+            onClose,
+            conflicts
+        }) {
+            const [formData, setFormData] = useState(schedule || {
+                day: days[0],
+                timeSlot: timeSlots[0],
+                class: classes[0],
+                subject: subjects[0],
+                teacher: teachers[0],
+                room: rooms[0]
+            });
+
+            const [errors, setErrors] = useState({});
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData({
+                    ...formData,
+                    [name]: value
+                });
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                
+                // Validate form
+                const newErrors = {};
+                if (!formData.day) newErrors.day = 'Day is required';
+                if (!formData.timeSlot) newErrors.timeSlot = 'Time slot is required';
+                if (!formData.class) newErrors.class = 'Class is required';
+                if (!formData.subject) newErrors.subject = 'Subject is required';
+                if (!formData.teacher) newErrors.teacher = 'Teacher is required';
+                if (!formData.room) newErrors.room = 'Room is required';
+                
+                if (Object.keys(newErrors).length > 0) {
+                    setErrors(newErrors);
+                    return;
+                }
+                
+                onSave(formData);
+            };
+
+            // Check for conflicts in the current form data
+            const currentConflicts = conflicts.filter(conflict => {
+                if (schedule && (conflict.schedule1.id === schedule.id || conflict.schedule2.id === schedule.id)) {
+                    return false; // Don't count the current schedule being edited
+                }
+                
+                return (
+                    conflict.schedule1.day === formData.day && 
+                    conflict.schedule1.timeSlot === formData.timeSlot && 
+                    (
+                        conflict.schedule1.room === formData.room ||
+                        conflict.schedule1.teacher === formData.teacher ||
+                        conflict.schedule1.class === formData.class
+                    )
+                );
+            });
+
+            return (
+                <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    {schedule ? 'Edit Schedule' : 'Add New Schedule'}
+                                </h5>
+                                <button type="button" className="btn-close" onClick={onClose}></button>
+                            </div>
+                            <div className="modal-body">
+                                {currentConflicts.length > 0 && (
+                                    <div className="alert alert-danger mb-4">
+                                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                                        This schedule conflicts with:
+                                        <ul className="mt-2">
+                                            {currentConflicts.map((conflict, index) => (
+                                                <li key={index}>
+                                                    {conflict.type} conflict with {conflict.schedule1.class} ({conflict.schedule1.teacher}, {conflict.schedule1.room})
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                
+                                <form onSubmit={handleSubmit}>
+                                    <div className="row mb-3">
+                                        <div className="col-md-6">
+                                            <label className="form-label">Day</label>
+                                            <select 
+                                                className={`form-select ${errors.day ? 'is-invalid' : ''}`}
+                                                name="day"
+                                                value={formData.day}
+                                                onChange={handleChange}
+                                            >
+                                                {days.map(day => (
+                                                    <option key={day} value={day}>{day}</option>
+                                                ))}
+                                            </select>
+                                            {errors.day && <div className="invalid-feedback">{errors.day}</div>}
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label">Time Slot</label>
+                                            <select 
+                                                className={`form-select ${errors.timeSlot ? 'is-invalid' : ''}`}
+                                                name="timeSlot"
+                                                value={formData.timeSlot}
+                                                onChange={handleChange}
+                                            >
+                                                {timeSlots.map(time => (
+                                                    <option key={time} value={time}>{time}</option>
+                                                ))}
+                                            </select>
+                                            {errors.timeSlot && <div className="invalid-feedback">{errors.timeSlot}</div>}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="row mb-3">
+                                        <div className="col-md-6">
+                                            <label className="form-label">Class</label>
+                                            <select 
+                                                className={`form-select ${errors.class ? 'is-invalid' : ''}`}
+                                                name="class"
+                                                value={formData.class}
+                                                onChange={handleChange}
+                                            >
+                                                {classes.map(cls => (
+                                                    <option key={cls} value={cls}>{cls}</option>
+                                                ))}
+                                            </select>
+                                            {errors.class && <div className="invalid-feedback">{errors.class}</div>}
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label">Subject</label>
+                                            <select 
+                                                className={`form-select ${errors.subject ? 'is-invalid' : ''}`}
+                                                name="subject"
+                                                value={formData.subject}
+                                                onChange={handleChange}
+                                            >
+                                                {subjects.map(subject => (
+                                                    <option key={subject} value={subject}>{subject}</option>
+                                                ))}
+                                            </select>
+                                            {errors.subject && <div className="invalid-feedback">{errors.subject}</div>}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="row mb-3">
+                                        <div className="col-md-6">
+                                            <label className="form-label">Teacher</label>
+                                            <select 
+                                                className={`form-select ${errors.teacher ? 'is-invalid' : ''}`}
+                                                name="teacher"
+                                                value={formData.teacher}
+                                                onChange={handleChange}
+                                            >
+                                                {teachers.map(teacher => (
+                                                    <option key={teacher} value={teacher}>{teacher}</option>
+                                                ))}
+                                            </select>
+                                            {errors.teacher && <div className="invalid-feedback">{errors.teacher}</div>}
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label">Room</label>
+                                            <select 
+                                                className={`form-select ${errors.room ? 'is-invalid' : ''}`}
+                                                name="room"
+                                                value={formData.room}
+                                                onChange={handleChange}
+                                            >
+                                                {rooms.map(room => (
+                                                    <option key={room} value={room}>{room}</option>
+                                                ))}
+                                            </select>
+                                            {errors.room && <div className="invalid-feedback">{errors.room}</div>}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="d-flex justify-content-end">
+                                        <button type="button" className="btn btn-secondary me-2" onClick={onClose}>
+                                            Cancel
+                                        </button>
+                                        <button type="submit" className="btn btn-primary">
+                                            {schedule ? 'Update Schedule' : 'Add Schedule'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Login View Component
+        function LoginView({ onLogin, switchToRegister }) {
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!username || !password) {
+                    setError('Please enter both username and password');
+                    return;
+                }
+                
+                const success = onLogin(username, password);
+                if (!success) {
+                    setError('Invalid username or password');
+                }
+            };
+
+            return (
+                <div className="login-container slide-in">
+                    <div className="text-center mb-4">
+                        <i className="bi bi-calendar-week text-primary" style={{ fontSize: '3rem' }}></i>
+                        <h2 className="mt-2">Welcome to EduSchedule</h2>
+                        <p className="text-muted">Please sign in to continue</p>
+                    </div>
+                    
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-3">
+                            <label className="form-label">Username</label>
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Password</label>
+                            <input 
+                                type="password" 
+                                className="form-control" 
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                        <div className="mb-3 form-check">
+                            <input type="checkbox" className="form-check-input" id="rememberMe" />
+                            <label className="form-check-label" htmlFor="rememberMe">Remember me</label>
+                        </div>
+                        <button type="submit" className="btn btn-primary w-100 mb-3">
+                            Sign In
+                        </button>
+                        <div className="text-center">
+                            <button 
+                                type="button" 
+                                className="btn btn-link" 
+                                onClick={switchToRegister}
+                            >
+                                Don't have an account? Register
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            );
+        }
+
+        // Register View Component
+        function RegisterView({ onRegister, switchToLogin }) {
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [confirmPassword, setConfirmPassword] = useState('');
+            const [name, setName] = useState('');
+            const [error, setError] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                
+                if (!username || !password || !confirmPassword || !name) {
+                    setError('Please fill in all fields');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    setError('Passwords do not match');
+                    return;
+                }
+                
+                const success = onRegister(username, password, name);
+                if (success) {
+                    switchToLogin();
+                } else {
+                    setError('Registration failed. Username may already exist.');
+                }
+            };
+
+            return (
+                <div className="login-container slide-in">
+                    <div className="text-center mb-4">
+                        <i className="bi bi-calendar-week text-primary" style={{ fontSize: '3rem' }}></i>
+                        <h2 className="mt-2">Create an Account</h2>
+                        <p className="text-muted">Join EduSchedule today</p>
+                    </div>
+                    
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-3">
+                            <label className="form-label">Full Name</label>
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Username</label>
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Password</label>
+                            <input 
+                                type="password" 
+                                className="form-control" 
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Confirm Password</label>
+                            <input 
+                                type="password" 
+                                className="form-control" 
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                            />
+                        </div>
+                        <button type="submit" className="btn btn-primary w-100 mb-3">
+                            Register
+                        </button>
+                        <div className="text-center">
+                            <button 
+                                type="button" 
+                                className="btn btn-link" 
+                                onClick={switchToLogin}
+                            >
+                                Already have an account? Sign In
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            );
+        }
+
+        // Manage Users View Component
+        function ManageUsersView({ users, setUsers, currentUser }) {
+            const [editingUser, setEditingUser] = useState(null);
+            const [showUserModal, setShowUserModal] = useState(false);
+            const [filter, setFilter] = useState('');
+
+            const filteredUsers = users.filter(user => 
+                user.username.toLowerCase().includes(filter.toLowerCase()) ||
+                user.name.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            const handleSaveUser = (userData) => {
+                if (userData.id) {
+                    // Update existing user
+                    setUsers(users.map(u => 
+                        u.id === userData.id ? userData : u
+                    ));
+                } else {
+                    // Add new user
+                    const newUser = {
+                        ...userData,
+                        id: users.length + 1
+                    };
+                    setUsers([...users, newUser]);
+                }
+                setShowUserModal(false);
+                setEditingUser(null);
+            };
+
+            const handleDeleteUser = (id) => {
+                if (id === currentUser.id) {
+                    alert('You cannot delete your own account!');
+                    return;
+                }
+                if (window.confirm('Are you sure you want to delete this user?')) {
+                    setUsers(users.filter(u => u.id !== id));
+                }
+            };
+
+            return (
+                <div className="fade-in">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h2 className="mb-0"><i className="bi bi-people me-2"></i> Manage Users</h2>
+                        <div className="d-flex">
+                            <input 
+                                type="text" 
+                                className="form-control me-2" 
+                                placeholder="Search users..."
+                                value={filter}
+                                onChange={(e) => setFilter(e.target.value)}
+                            />
+                            <button 
+                                className="btn btn-primary"
+                                onClick={() => {
+                                    setEditingUser(null);
+                                    setShowUserModal(true);
+                                }}
+                            >
+                                <i className="bi bi-plus-lg"></i> Add User
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="card shadow">
+                        <div className="card-body">
+                            <div className="table-responsive">
+                                <table className="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Username</th>
+                                            <th>Name</th>
+                                            <th>Role</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredUsers.map(user => (
+                                            <tr key={user.id}>
+                                                <td>{user.id}</td>
+                                                <td>{user.username}</td>
+                                                <td>{user.name}</td>
+                                                <td>
+                                                    <span className={`badge ${
+                                                        user.role === 'admin' ? 'bg-danger' : 
+                                                        user.role === 'teacher' ? 'bg-primary' : 'bg-success'
+                                                    }`}>
+                                                        {user.role}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <button 
+                                                        className="btn btn-sm btn-outline-primary me-2"
+                                                        onClick={() => {
+                                                            setEditingUser(user);
+                                                            setShowUserModal(true);
+                                                        }}
+                                                    >
+                                                        <i className="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button 
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        onClick={() => handleDeleteUser(user.id)}
+                                                        disabled={user.id === currentUser.id}
+                                                    >
+                                                        <i className="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    {showUserModal && (
+                        <UserModal 
+                            user={editingUser} 
+                            onSave={handleSaveUser} 
+                            onClose={() => {
+                                setShowUserModal(false);
+                                setEditingUser(null);
+                            }}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        // User Modal Component
+        function UserModal({ user, onSave, onClose }) {
+            const [formData, setFormData] = useState(user || {
+                username: '',
+                password: '',
+                name: '',
+                role: 'student'
+            });
+
+            const [errors, setErrors] = useState({});
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData({
+                    ...formData,
+                    [name]: value
+                });
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                
+                // Validate form
+                const newErrors = {};
+                if (!formData.username) newErrors.username = 'Username is required';
+                if (!user && !formData.password) newErrors.password = 'Password is required';
+                if (!formData.name) newErrors.name = 'Name is required';
+                if (!formData.role) newErrors.role = 'Role is required';
+                
+                if (Object.keys(newErrors).length > 0) {
+                    setErrors(newErrors);
+                    return;
+                }
+                
+                onSave(formData);
+            };
+
+            return (
+                <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    {user ? 'Edit User' : 'Add New User'}
+                                </h5>
+                                <button type="button" className="btn-close" onClick={onClose}></button>
+                            </div>
+                            <div className="modal-body">
+                                <form onSubmit={handleSubmit}>
+                                    <div className="mb-3">
+                                        <label className="form-label">Username</label>
+                                        <input 
+                                            type="text" 
+                                            className={`form-control ${errors.username ? 'is-invalid' : ''}`}
+                                            name="username"
+                                            value={formData.username}
+                                            onChange={handleChange}
+                                        />
+                                        {errors.username && <div className="invalid-feedback">{errors.username}</div>}
+                                    </div>
+                                    
+                                    {!user && (
+                                        <div className="mb-3">
+                                            <label className="form-label">Password</label>
+                                            <input 
+                                                type="password" 
+                                                className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                                                name="password"
+                                                value={formData.password}
+                                                onChange={handleChange}
+                                            />
+                                            {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+                                        </div>
+                                    )}
+                                    
+                                    <div className="mb-3">
+                                        <label className="form-label">Full Name</label>
+                                        <input 
+                                            type="text" 
+                                            className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                        />
+                                        {errors.name && <div className="invalid-feedback">{errors.name}</div>}
+                                    </div>
+                                    
+                                    <div className="mb-3">
+                                        <label className="form-label">Role</label>
+                                        <select 
+                                            className={`form-select ${errors.role ? 'is-invalid' : ''}`}
+                                            name="role"
+                                            value={formData.role}
+                                            onChange={handleChange}
+                                        >
+                                            <option value="student">Student</option>
+                                            <option value="teacher">Teacher</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                        {errors.role && <div className="invalid-feedback">{errors.role}</div>}
+                                    </div>
+                                    
+                                    <div className="d-flex justify-content-end">
+                                        <button type="button" className="btn btn-secondary me-2" onClick={onClose}>
+                                            Cancel
+                                        </button>
+                                        <button type="submit" className="btn btn-primary">
+                                            {user ? 'Update User' : 'Add User'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Profile View Component
+        function ProfileView({ currentUser, setCurrentUser }) {
+            const [formData, setFormData] = useState(currentUser);
+            const [editMode, setEditMode] = useState(false);
+            const [successMessage, setSuccessMessage] = useState('');
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData({
+                    ...formData,
+                    [name]: value
+                });
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                setCurrentUser(formData);
+                localStorage.setItem('currentUser', JSON.stringify(formData));
+                setEditMode(false);
+                setSuccessMessage('Profile updated successfully!');
+                setTimeout(() => setSuccessMessage(''), 3000);
+            };
+
+            return (
+                <div className="fade-in">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h2 className="mb-0"><i className="bi bi-person me-2"></i> My Profile</h2>
+                        {!editMode && (
+                            <button 
+                                className="btn btn-primary"
+                                onClick={() => setEditMode(true)}
+                            >
+                                <i className="bi bi-pencil"></i> Edit Profile
+                            </button>
+                        )}
+                    </div>
+
+                    {successMessage && (
+                        <div className="alert alert-success mb-4">
+                            <i className="bi bi-check-circle-fill me-2"></i>
+                            {successMessage}
+                        </div>
+                    )}
+
+                    <div className="card shadow">
+                        <div className="card-body">
+                            {editMode ? (
+                                <form onSubmit={handleSubmit}>
+                                    <div className="row mb-3">
+                                        <div className="col-md-6">
+                                            <label className="form-label">Username</label>
+                                            <input 
+                                                type="text" 
+                                                className="form-control" 
+                                                name="username"
+                                                value={formData.username}
+                                                onChange={handleChange}
+                                                disabled
+                                            />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label">Role</label>
+                                            <input 
+                                                type="text" 
+                                                className="form-control" 
+                                                value={formData.role}
+                                                disabled
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Full Name</label>
+                                        <input 
+                                            type="text" 
+                                            className="form-control" 
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Change Password</label>
+                                        <input 
+                                            type="password" 
+                                            className="form-control" 
+                                            name="password"
+                                            placeholder="Enter new password"
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+                                    <div className="d-flex justify-content-end">
+                                        <button 
+                                            type="button" 
+                                            className="btn btn-secondary me-2" 
+                                            onClick={() => setEditMode(false)}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button type="submit" className="btn btn-primary">
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <div className="row">
+                                    <div className="col-md-3 text-center">
+                                        <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '120px', height: '120px', fontSize: '3rem' }}>
+                                            {currentUser.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <h4>{currentUser.name}</h4>
+                                        <span className={`badge ${
+                                            currentUser.role === 'admin' ? 'bg-danger' : 
+                                            currentUser.role === 'teacher' ? 'bg-primary' : 'bg-success'
+                                        }`}>
+                                            {currentUser.role}
+                                        </span>
+                                    </div>
+                                    <div className="col-md-9">
+                                        <div className="row mb-3">
+                                            <div className="col-md-6">
+                                                <label className="form-label">Username</label>
+                                                <input 
+                                                    type="text" 
+                                                    className="form-control" 
+                                                    value={currentUser.username}
+                                                    disabled
+                                                />
+                                            </div>
+                                            <div className="col-md-6">
+                                                <label className="form-label">Role</label>
+                                                <input 
+                                                    type="text" 
+                                                    className="form-control" 
+                                                    value={currentUser.role}
+                                                    disabled
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="mb-3">
+                                            <label className="form-label">Name</label>
+                                            <input 
+                                                type="text" 
+                                                className="form-control" 
+                                                value={currentUser.name}
+                                                disabled
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Initialize tooltips
+        function initTooltips() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+
+        // Initialize tooltips after render
+        setTimeout(initTooltips, 100);
+    </script>
+</body>
+</html>
